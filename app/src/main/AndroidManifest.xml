@@ -20,8 +20,8 @@
         <activity
             android:name=".CatalogActivity"
             android:exported="false"
-            android:label="@string/title_activity_catalog"
-            android:theme="@style/Theme.DsCatalog" />
+            android:parentActivityName=".MainActivity"
+            android:label="@string/title_activity_catalog" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
