@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.recyclerview.widget.GridLayoutManager
 import com.gtavares.dscatalog.adapter.ProductAdapter
 import com.gtavares.dscatalog.api.RetrofitHelper
@@ -30,8 +31,58 @@ class CatalogActivity : AppCompatActivity() {
         initialiseToolbar()
         configRecycleview()
         recover()
+        searchView()
     }
 
+    private fun searchView() {
+        binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterProductByName(newText)
+                return true
+            }
+
+        })
+    }
+
+    private fun filterProductByName(newText: String?) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                var response: Response<PageResponse<Product>>? = null
+                response = dsCatalogAPI.recoverProductsByName(newText)
+
+                if (response.isSuccessful) {
+
+                    val products = response.body()
+
+                    if (products != null) {
+
+                        withContext(Dispatchers.Main) {
+                            adapter.attackProducts(products.content)
+                        }
+
+                    } else {
+
+                        Log.e("DSCatalog", "Lista vazia")
+
+                    }
+                } else {
+
+                    Log.e("DSCatalog", "cod ${response.code()} message: ${response.message()}")
+
+                }
+
+                binding.progressBar.visibility = View.GONE
+
+            } catch (e: Exception) {
+                Log.e("DSCatalog", e.message.toString())
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+    }
 
     private fun recover() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -39,7 +90,7 @@ class CatalogActivity : AppCompatActivity() {
                 var response: Response<PageResponse<Product>>? = null
                 response = dsCatalogAPI.recoverProducts()
 
-                if (response != null && response.isSuccessful) {
+                if (response.isSuccessful) {
 
                     val products = response.body()
 

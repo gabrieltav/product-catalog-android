@@ -8,6 +8,7 @@ object RetrofitHelper {
     fun recoverData(): DsCatalogAPI {
         return Retrofit.Builder()
             .baseUrl("https://bds-dscatalog.onrender.com/")
+//            .baseUrl("http://192.168.15.10:8080/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DsCatalogAPI::class.java)
